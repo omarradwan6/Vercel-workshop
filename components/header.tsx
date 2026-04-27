@@ -20,12 +20,6 @@ export function Header() {
         <nav className="flex items-center gap-6">
           <Link
             href="/products"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Products
-          </Link>
-          <Link
-            href="/products"
             className="text-muted-foreground transition-colors hover:text-foreground"
             aria-label="Search products"
           >

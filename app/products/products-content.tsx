@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ProductGrid } from "@/components/product-grid"
 import { categories, searchProducts } from "@/lib/products"
-import { ProductsLoading } from "./products-loading"
 import { ProductsEmpty } from "./products-empty"
 
 interface ProductsContentProps {
@@ -17,58 +16,43 @@ interface ProductsContentProps {
 
 export function ProductsContent({ initialQuery, initialCategory }: ProductsContentProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
 
   const [query, setQuery] = useState(initialQuery)
   const [category, setCategory] = useState(initialCategory)
-  const [isSearching, setIsSearching] = useState(false)
 
   // Get filtered products (limit to 5 when searching)
   const allResults = searchProducts(query, category)
   const products = query ? allResults.slice(0, 5) : allResults
 
   // Update URL when search parameters change
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
+  const updateURL = useCallback((newQuery: string, newCategory: string) => {
+    const params = new URLSearchParams()
 
-    if (query) {
-      params.set("q", query)
-    } else {
-      params.delete("q")
+    if (newQuery) {
+      params.set("q", newQuery)
     }
 
-    if (category && category !== "All") {
-      params.set("category", category)
-    } else {
-      params.delete("category")
+    if (newCategory && newCategory !== "All") {
+      params.set("category", newCategory)
     }
 
-    const newUrl = params.toString() ? `?${params.toString()}` : "/products"
+    const newUrl = params.toString() ? `/products?${params.toString()}` : "/products"
+    router.replace(newUrl, { scroll: false })
+  }, [router])
 
-    startTransition(() => {
-      router.replace(newUrl, { scroll: false })
-    })
-  }, [query, category, router, searchParams])
-
-  // Simulate loading state for search
   const handleSearch = (value: string) => {
-    setIsSearching(true)
     setQuery(value)
-
-    // Simulate a brief loading delay
-    setTimeout(() => {
-      setIsSearching(false)
-    }, 300)
+    updateURL(value, category)
   }
 
   const handleClearSearch = () => {
     setQuery("")
-    setIsSearching(false)
+    updateURL("", category)
   }
 
   const handleCategoryChange = (newCategory: string) => {
     setCategory(newCategory)
+    updateURL(query, newCategory)
   }
 
   return (
@@ -123,9 +107,7 @@ export function ProductsContent({ initialQuery, initialCategory }: ProductsConte
 
       {/* Content */}
       <div className="mt-8">
-        {isSearching || isPending ? (
-          <ProductsLoading />
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <ProductsEmpty query={query} onClear={handleClearSearch} />
         ) : (
           <ProductGrid products={products} />
