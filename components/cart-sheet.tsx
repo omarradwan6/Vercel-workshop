@@ -7,31 +7,38 @@ import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet"
 import { useCart } from "@/components/cart-provider"
+import { formatPrice } from "@/lib/format"
 
 export function CartSheet() {
   const {
     isOpen,
     closeCart,
-    cartWithProducts,
-    cartTotal,
+    cart,
     itemCount,
     removeFromCart,
     updateQuantity,
   } = useCart()
+
+  const items = cart.items
+  const currency = cart.currency || "USD"
 
   return (
     <Sheet open={isOpen} onOpenChange={closeCart}>
       <SheetContent side="right" className="flex flex-col">
         <SheetHeader>
           <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
+          <SheetDescription className="sr-only">
+            Review the items in your cart, adjust quantities, or remove items.
+          </SheetDescription>
         </SheetHeader>
 
-        {cartWithProducts.length === 0 ? (
+        {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4">
             <p className="text-muted-foreground">Your cart is empty</p>
             <Button variant="outline" onClick={closeCart} asChild>
@@ -42,21 +49,23 @@ export function CartSheet() {
           <>
             <div className="flex-1 overflow-y-auto">
               <ul className="divide-y divide-border">
-                {cartWithProducts.map((item) => (
+                {items.map((item) => (
                   <li key={item.productId} className="px-4 py-4">
                     <div className="flex gap-4">
                       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
-                        <Image
-                          src={item.product.image}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
+                        {item.product.images[0] && (
+                          <Image
+                            src={item.product.images[0]}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                       </div>
                       <div className="flex flex-1 flex-col">
                         <div className="flex justify-between">
                           <Link
-                            href={`/product/${item.productId}`}
+                            href={`/products/${item.productId}`}
                             onClick={closeCart}
                             className="text-sm font-medium text-foreground hover:underline"
                           >
@@ -71,7 +80,7 @@ export function CartSheet() {
                           </button>
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          ${item.product.price}
+                          {formatPrice(item.product.price, currency)}
                         </p>
                         <div className="mt-2 flex items-center gap-2">
                           <button
@@ -95,6 +104,9 @@ export function CartSheet() {
                           >
                             <Plus className="h-3 w-3" />
                           </button>
+                          <span className="ml-auto text-sm font-medium tabular-nums">
+                            {formatPrice(item.lineTotal, currency)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -107,7 +119,7 @@ export function CartSheet() {
               <div className="w-full space-y-4">
                 <div className="flex items-center justify-between text-base font-medium">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>{formatPrice(cart.subtotal, currency)}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Shipping and taxes calculated at checkout.

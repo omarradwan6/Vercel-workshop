@@ -8,7 +8,7 @@ export function CategoryShowcase() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Clothing Category - Dark, bold design */}
         <Link
-          href="/search/apparel"
+          href="/search?category=hoodies"
           className="group relative flex min-h-[320px] flex-col justify-end overflow-hidden rounded-2xl bg-foreground p-8"
         >
           <div className="absolute inset-0">
@@ -16,6 +16,8 @@ export function CategoryShowcase() {
               src="/categories/clothing.jpg"
               alt="Clothing collection"
               fill
+              priority
+              sizes="(min-width: 768px) 50vw, 100vw"
               className="object-cover opacity-60 transition-all duration-500 group-hover:scale-105 group-hover:opacity-70"
             />
           </div>
@@ -38,7 +40,7 @@ export function CategoryShowcase() {
 
         {/* Drinkware Category - Light, minimal design */}
         <Link
-          href="/search/drinkware"
+          href="/search?category=mugs"
           className="group relative flex min-h-[320px] flex-col justify-end overflow-hidden rounded-2xl border border-border bg-muted p-8"
         >
           <div className="absolute inset-0">
@@ -46,6 +48,7 @@ export function CategoryShowcase() {
               src="/categories/drinkware.jpg"
               alt="Drinkware collection"
               fill
+              sizes="(min-width: 768px) 50vw, 100vw"
               className="object-cover opacity-80 transition-all duration-500 group-hover:scale-105 group-hover:opacity-90"
             />
           </div>

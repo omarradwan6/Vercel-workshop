@@ -1,12 +1,8 @@
-"use client"
-
 import Link from "next/link"
-import { Search, ShoppingBag } from "lucide-react"
-import { useCart } from "@/components/cart-provider"
+import { Search } from "lucide-react"
+import { CartButton } from "@/components/cart-button"
 
 export function Header() {
-  const { itemCount, openCart } = useCart()
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -30,29 +26,8 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </Link>
-          <button
-            onClick={openCart}
-            className="relative text-muted-foreground transition-colors hover:text-foreground"
-            aria-label="Shopping cart"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {itemCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-xs font-medium text-background">
-                {itemCount > 99 ? "99+" : itemCount}
-              </span>
-            )}
-          </button>
+          <CartButton />
         </nav>
-      </div>
-
-      {/* Sales Banner */}
-      <div className="bg-foreground px-4 py-2 text-center text-sm text-background">
-        <p>
-          <span className="font-semibold">Free shipping</span> on all orders over $100.{" "}
-          <Link href="/search" className="underline underline-offset-2 hover:opacity-80">
-            Shop now
-          </Link>
-        </p>
       </div>
     </header>
   )
