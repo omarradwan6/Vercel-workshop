@@ -1,5 +1,6 @@
 "use client";
 
+import { AgentChat } from "@/components/agent-chat";
 import {
   Sidebar,
   SidebarContent,
@@ -11,10 +12,12 @@ export function AgentSidebar() {
     <Sidebar side="right" collapsible="offcanvas">
       <SidebarHeader>
         <div className="px-2 py-1.5 text-sm font-semibold">
-          Shopping Assistant
+          Vercel Swag Agent
         </div>
       </SidebarHeader>
-      <SidebarContent />
+      <SidebarContent className="overflow-hidden p-0">
+        <AgentChat />
+      </SidebarContent>
     </Sidebar>
   );
 }
