@@ -193,6 +193,7 @@ export interface GetProductsParams {
 export async function getProducts(
   params: GetProductsParams = {},
 ): Promise<Product[]> {
+  console.log("[getProducts]", params);
   const qs = new URLSearchParams();
   if (params.page) qs.set("page", String(params.page));
   if (params.limit) qs.set("limit", String(params.limit));
