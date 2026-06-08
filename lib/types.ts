@@ -240,3 +240,12 @@ export interface Return {
     status: string;
   };
 }
+
+export interface RefundPreauthorization {
+  id: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  status: "authorized";
+  createdAt: string;
+}

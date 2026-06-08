@@ -20,6 +20,7 @@ import type {
   SupportTicketPriority,
   SupportTicketStatus,
   Order,
+  RefundPreauthorization,
   Return,
 } from "./types";
 
@@ -107,7 +108,18 @@ async function request<T>(
   if (cache) init.cache = cache;
   if (next) init.next = next;
 
-  const res = await fetch(withBypass(path), init);
+  let res: Response;
+  try {
+    res = await fetch(withBypass(path), init);
+  } catch (err) {
+    console.error(`[api] ${method} ${path} network error:`, err);
+    throw new ApiRequestError(
+      0,
+      "NETWORK_ERROR",
+      `Network request failed: ${method} ${path}`,
+      err,
+    );
+  }
 
   let json: ApiResult<T> | undefined;
   try {
@@ -117,13 +129,23 @@ async function request<T>(
   }
 
   if (!res.ok || !json || json.success === false) {
-    const err = json && json.success === false ? json.error : undefined;
-    throw new ApiRequestError(
+    const apiErr = json && json.success === false ? json.error : undefined;
+    const error = new ApiRequestError(
       res.status,
-      err?.code,
-      err?.message ?? `API request failed: ${res.status} ${path}`,
-      err?.details,
+      apiErr?.code,
+      apiErr?.message ?? `API request failed: ${res.status} ${path}`,
+      apiErr?.details,
     );
+    // Expected 404s (e.g. no active promotion) are swallowed by callers; don't
+    // pollute logs with them. Log every other failure once, here.
+    if (res.status !== 404) {
+      console.error(`[api] ${method} ${path} failed:`, {
+        status: error.status,
+        code: error.code,
+        message: error.message,
+      });
+    }
+    throw error;
   }
 
   return json.data;
@@ -152,7 +174,18 @@ async function requestWithMeta<T, M>(
   if (cache) init.cache = cache;
   if (next) init.next = next;
 
-  const res = await fetch(withBypass(path), init);
+  let res: Response;
+  try {
+    res = await fetch(withBypass(path), init);
+  } catch (err) {
+    console.error(`[api] ${method} ${path} network error:`, err);
+    throw new ApiRequestError(
+      0,
+      "NETWORK_ERROR",
+      `Network request failed: ${method} ${path}`,
+      err,
+    );
+  }
 
   let json: ApiResult<T, M> | undefined;
   try {
@@ -162,21 +195,34 @@ async function requestWithMeta<T, M>(
   }
 
   if (!res.ok || !json || json.success === false) {
-    const err = json && json.success === false ? json.error : undefined;
-    throw new ApiRequestError(
+    const apiErr = json && json.success === false ? json.error : undefined;
+    const error = new ApiRequestError(
       res.status,
-      err?.code,
-      err?.message ?? `API request failed: ${res.status} ${path}`,
-      err?.details,
+      apiErr?.code,
+      apiErr?.message ?? `API request failed: ${res.status} ${path}`,
+      apiErr?.details,
     );
+    if (res.status !== 404) {
+      console.error(`[api] ${method} ${path} failed:`, {
+        status: error.status,
+        code: error.code,
+        message: error.message,
+      });
+    }
+    throw error;
   }
 
   if (json.meta === undefined) {
-    throw new ApiRequestError(
+    const error = new ApiRequestError(
       res.status,
       undefined,
       `API response missing meta: ${path}`,
     );
+    console.error(`[api] ${method} ${path} failed:`, {
+      status: error.status,
+      message: error.message,
+    });
+    throw error;
   }
 
   return { data: json.data, meta: json.meta };
@@ -332,6 +378,23 @@ export async function createReturn(input: CreateReturnInput): Promise<Return> {
   return request<Return>("/returns", {
     method: "POST",
     body: input,
+    cache: "no-store",
+  });
+}
+
+export async function notifyReturnInProcess(orderId: string): Promise<void> {
+  // In production this would hit your email provider.
+  console.log(
+    `[returnOrder] 📧 told customer their return for order ${orderId} is being processed`,
+  );
+}
+
+export async function preauthorizeRefund(
+  orderId: string,
+): Promise<RefundPreauthorization> {
+  return request<RefundPreauthorization>("/refunds/preauthorize", {
+    method: "POST",
+    body: { orderId },
     cache: "no-store",
   });
 }

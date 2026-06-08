@@ -123,3 +123,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+ * Suppress the agent panel's slide animation during initial hydration so a
+ * refresh with ?chat=open shows it already open with no animation (the server
+ * always renders it closed — it can't read the param without opting the route
+ * into dynamic rendering). AgentPanelSync adds this class before opening the
+ * panel and removes it on the next frame, so user-initiated toggles still
+ * animate normally.
+ */
+.agent-panel-booting [data-slot='sidebar-gap'],
+.agent-panel-booting [data-slot='sidebar-container'],
+.agent-panel-booting [data-mobile='true'][data-slot='sidebar'] {
+  transition: none !important;
+  animation: none !important;
+}

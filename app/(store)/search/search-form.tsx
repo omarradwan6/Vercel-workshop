@@ -25,9 +25,13 @@ const AUTO_TRIGGER_MIN = 3
 const DEBOUNCE_MS = 300
 
 function buildHref(query: string, category: string) {
-  const params = new URLSearchParams()
+  // Seed from the live URL so unrelated params (e.g. the agent panel's
+  // `chat`) survive search navigations; delete-on-empty to keep clearing.
+  const params = new URLSearchParams(window.location.search)
   if (query) params.set("q", query)
+  else params.delete("q")
   if (category) params.set("category", category)
+  else params.delete("category")
   const qs = params.toString()
   return qs ? `/search?${qs}` : "/search"
 }
