@@ -1,11 +1,11 @@
 "use client";
 
-import { AgentChat } from "@/components/agent-chat";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { AdminAgentChat } from "./admin-agent-chat";
 
 export function AgentSidebar() {
   return (
@@ -16,7 +16,7 @@ export function AgentSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="overflow-hidden p-0">
-        <AgentChat />
+        <AdminAgentChat />
       </SidebarContent>
     </Sidebar>
   );
